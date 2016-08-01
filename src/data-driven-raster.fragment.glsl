@@ -10,11 +10,17 @@ uniform float u_opacity0;
 uniform float u_opacity1;
 uniform sampler2D u_image0;
 uniform sampler2D u_image1;
+uniform sampler2D u_image2;
 varying vec2 v_pos0;
 varying vec2 v_pos1;
 
 uniform float u_brightness_low;
 uniform float u_brightness_high;
+
+// These indicate the range of the data tile png
+// e.g. 0 - 100 for temperature tiles
+uniform float u_data_min;
+uniform float u_data_max;
 
 uniform float u_saturation_factor;
 uniform float u_contrast_factor;
@@ -29,10 +35,8 @@ void main() {
     vec3 rgb = color.rgb;
 
     float value = rgb.r * 255.0;
-    // (value - 0.0) / (100.0 - 0.0);
-    value = value / 100.0;
-    // NOTE: no need to clamp, `smoothstep` further down implies a clamp
-    // value = clamp(value, 0.0, 1.0);
+    value = (value - u_data_min) / (u_data_max - u_data_min);
+    value = clamp(value, 0.0, 1.0);
 
     // spin
     rgb = vec3(
@@ -51,13 +55,9 @@ void main() {
     vec3 u_high_vec = vec3(u_brightness_low, u_brightness_low, u_brightness_low);
     vec3 u_low_vec = vec3(u_brightness_high, u_brightness_high, u_brightness_high);
 
-    // interpolate between red and blue
-    rgb.r = smoothstep(0.0, 1.0, value);
-    rgb.g = 0.0;
-    rgb.b = smoothstep(0.0, 1.0, (1.0 - value));
-
     // gl_FragColor = vec4(mix(u_high_vec, u_low_vec, rgb), color.a);
-    gl_FragColor = vec4(mix(u_high_vec, u_low_vec, rgb), 0.6);
+    vec4 lookUpColor = texture2D(u_image2, vec2(value, 0.0));
+    gl_FragColor = lookUpColor;
 
 #ifdef OVERDRAW_INSPECTOR
     gl_FragColor = vec4(1.0);
