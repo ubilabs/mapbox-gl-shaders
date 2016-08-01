@@ -28,6 +28,12 @@ void main() {
     vec4 color = color0 * u_opacity0 + color1 * u_opacity1;
     vec3 rgb = color.rgb;
 
+    float value = rgb.r * 255.0;
+    // (value - 0.0) / (100.0 - 0.0);
+    value = value / 100.0;
+    // NOTE: no need to clamp, `smoothstep` further down implies a clamp
+    // value = clamp(value, 0.0, 1.0);
+
     // spin
     rgb = vec3(
         dot(rgb, u_spin_weights.xyz),
@@ -45,7 +51,13 @@ void main() {
     vec3 u_high_vec = vec3(u_brightness_low, u_brightness_low, u_brightness_low);
     vec3 u_low_vec = vec3(u_brightness_high, u_brightness_high, u_brightness_high);
 
-    gl_FragColor = vec4(mix(u_high_vec, u_low_vec, rgb), color.a);
+    // interpolate between red and blue
+    rgb.r = smoothstep(0.0, 1.0, value);
+    rgb.g = 0.0;
+    rgb.b = smoothstep(0.0, 1.0, (1.0 - value));
+
+    // gl_FragColor = vec4(mix(u_high_vec, u_low_vec, rgb), color.a);
+    gl_FragColor = vec4(mix(u_high_vec, u_low_vec, rgb), 0.6);
 
 #ifdef OVERDRAW_INSPECTOR
     gl_FragColor = vec4(1.0);
