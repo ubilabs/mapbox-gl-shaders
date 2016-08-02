@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/mapbox/mapbox-gl-shaders.git"
+    "url": "git+https://github.com/ubilabs/mapbox-gl-shaders.git"
   },
   "author": "",
   "license": "ISC",
